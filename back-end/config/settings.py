@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-y!zvtquxx0rn3t5^to&_^=qdp^!izdu&4tv!wm$)(np11)m(8l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -41,9 +41,11 @@ INSTALLED_APPS = [
     
     'rest_framework',
     'api',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # Must be at the top!
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -52,6 +54,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+#Allow all origins
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'config.urls'
 
@@ -86,6 +91,8 @@ DATABASES = {
         "PORT": os.environ.get("POSTGRES_PORT"),
     }
 }
+
+AUTH_USER_MODEL = "api.CustomUser"
 
 
 # Password validation
