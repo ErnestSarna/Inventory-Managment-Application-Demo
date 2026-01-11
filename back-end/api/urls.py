@@ -17,10 +17,20 @@ Including another URLconf
 from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
-from .viewsets.CustomUser import CustomUserViewSet
+from .viewsets.user import CustomUserViewSet
+from .viewsets.project import ProjectViewSet
+from .viewsets.location import LocationViewSet
+from .viewsets.vendor import VendorViewSet
+from .viewsets.inventory_item import InventoryItemViewSet
+from .viewsets.purchase_order import PurchaseOrderViewSet
 
 router = DefaultRouter()
 router.register(r"users", CustomUserViewSet)
+router.register(r"projects", ProjectViewSet)
+router.register(r"locations", LocationViewSet)
+router.register(r"vendors", VendorViewSet)
+router.register(r"inventory_items", InventoryItemViewSet)
+router.register(r"purchase_orders", PurchaseOrderViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

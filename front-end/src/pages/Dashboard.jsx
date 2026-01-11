@@ -4,11 +4,11 @@ import api from "../api/axios";
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const [projects, setProjects] = useState([{id: 1, name: "Project Alpha"}, {id: 2, name: "Project Beta"}]);
+    const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    /*useEffect(() => {
+    useEffect(() => {
         const fetchProjects = async () => {
             setLoading(true);
             setError(null);
@@ -24,7 +24,7 @@ const Dashboard = () => {
         };
 
         fetchProjects();
-    }, []);*/
+    }, []);
 
     //if (loading) return <p>Loading projects...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;

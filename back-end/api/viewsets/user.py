@@ -1,8 +1,6 @@
-# api/views.py
-
 from rest_framework import viewsets
 from ..models import CustomUser
-from ..serializers.CustomUser import CustomUserSerializer
+from ..serializers.user import CustomUserSerializer
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
