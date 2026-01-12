@@ -9,6 +9,6 @@ class VendorSerializer(serializers.ModelSerializer):
             "name",
             "address",
             "phone_number",
-            "email",
+            "contact_email",
         ]
         read_only_fields = ["id"]

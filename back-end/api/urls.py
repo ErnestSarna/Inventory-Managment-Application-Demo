@@ -23,6 +23,9 @@ from .viewsets.location import LocationViewSet
 from .viewsets.vendor import VendorViewSet
 from .viewsets.inventory_item import InventoryItemViewSet
 from .viewsets.purchase_order import PurchaseOrderViewSet
+from .viewsets.register import RegisterAPIView
+
+from .views import login_view
 
 router = DefaultRouter()
 router.register(r"users", CustomUserViewSet)
@@ -34,4 +37,6 @@ router.register(r"purchase_orders", PurchaseOrderViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path("register/", RegisterAPIView.as_view(), name="api-register"),
+    path('auth/login/', login_view),
 ]

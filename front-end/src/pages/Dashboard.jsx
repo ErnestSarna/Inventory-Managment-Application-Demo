@@ -1,48 +1,26 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import Locations from "../components/Locations";
+import Projects from "../components/Projects";
+import PurchaseOrders from "../components/PurchaseOrders";
+import Vendors from "../components/Vendors";
 
-const Dashboard = () => {
+export default function Dashboard() {
     const navigate = useNavigate();
-    const [projects, setProjects] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchProjects = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const response = await api.get("/projects/");
-                setProjects(response.data);
-            } catch (err) {
-                console.error("Error fetching projects:", err);
-                setError(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProjects();
-    }, []);
-
-    //if (loading) return <p>Loading projects...</p>;
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
-
-    return ( //TODO: add log out button
+    return (
         <div>
-            <h1>Dashboard</h1>
-            <ul>
-                {projects.map((project) => (
-                    <li key={project.id} onClick={() => navigate(`/projects/${project.id}`)}>
-                        <button onClick={() => navigate(`/projects/${project.id}`)}>
-                            {project.name}
-                        </button>
-                    </li>
-                ))}
-            </ul>
+            <div className="header">
+                <h1>Dashboard</h1>
+                <button onClick={() => navigate('/')}>Log Out</button>
+            </div>
+            <hr />
+            <Projects />
+            <hr />
+            <PurchaseOrders />
+            <hr />
+            <Vendors />
+            <hr />
+            <Locations />
         </div>
     );
 };
-
-export default Dashboard;
