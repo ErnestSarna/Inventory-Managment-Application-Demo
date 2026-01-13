@@ -57,10 +57,10 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
      'DEFAULT_PERMISSION_CLASSES': [
-         'rest_framework.permissions.AllowAny',  # require login by default
+         'rest_framework.permissions.IsAuthenticated',  # require login by default
      ],
      'DEFAULT_AUTHENTICATION_CLASSES': [
-         'rest_framework.authentication.TokenAuthentication',  # optional if using token
+         'rest_framework.authentication.SessionAuthentication',
      ],
      'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
      'PAGE_SIZE': 10,
@@ -70,11 +70,24 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173"
 ]
 
-SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+]
+
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "X-CSRFToken",
+]
+
+
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = None
 SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = None
 CSRF_COOKIE_SECURE = False
 
 ROOT_URLCONF = 'config.urls'

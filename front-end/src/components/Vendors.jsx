@@ -6,6 +6,9 @@ export default function Vendors() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [showForm, setShowForm] = useState(false);
+    const [editingVendor, setEditingVendor] = useState(null);
+
     useEffect(() => {
         const fetchVendors = async () => {
             setLoading(true);
@@ -31,8 +34,6 @@ export default function Vendors() {
 
         try {
             await api.delete(`/vendors/${vendorId}/`);
-
-            // Remove deleted vendor from state (no refetch needed)
             setVendors((prev) =>
                 prev.filter((vendor) => vendor.id !== vendorId)
             );
@@ -42,6 +43,17 @@ export default function Vendors() {
         }
     };
 
+    const handleSave = (savedVendor) => {
+        if (editingVendor) {
+            // Update existing
+            setVendors((prev) =>
+                prev.map((v) => (v.id === savedVendor.id ? savedVendor : v))
+            );
+        } else {
+            // Add new
+            setVendors((prev) => [savedVendor, ...prev]);
+        }
+    };
 
     if (loading) return <p>Loading vendors...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
@@ -50,7 +62,10 @@ export default function Vendors() {
         <div>    
             <div className="header">
                 <h2>Vendors</h2>
-                <button>+ New Vendor</button>
+                <button onClick={() => {
+                    setEditingVendor(null);
+                    setShowForm(true);
+                }}>+ New Vendor</button>
             </div>
             <div>
                 <ul>
@@ -60,7 +75,10 @@ export default function Vendors() {
                                 <div className="component-card">
                                     <div className="header">
                                         <strong>{vendor.name}</strong>
-                                        <button>Edit</button>
+                                        <button onClick={() => {
+                                            setEditingVendor(vendor);
+                                            setShowForm(true);
+                                        }}>Edit</button>
                                         <button onClick={() => handleDelete(vendor.id)}>Delete</button>
                                     </div>
                                     <hr/>
@@ -72,7 +90,82 @@ export default function Vendors() {
                         </li>
                     ))}
                 </ul>
+
+                {showForm && (
+                    <VendorForm
+                        vendor={editingVendor}
+                        onClose={() => setShowForm(false)}
+                        onSave={handleSave}
+                    />
+                )}
             </div>
         </div>
     );
 };
+
+function VendorForm({ vendor, onClose, onSave }) {
+    const [name, setName] = useState("");
+    const [address, setAddress] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [contactEmail, setContactEmail] = useState("");
+    const [error, setError] = useState(null);
+
+    // Populate form when editing
+    useEffect(() => {
+        if (vendor) {
+            setName(vendor.name || "");
+            setAddress(vendor.address || "");
+            setPhoneNumber(vendor.phone_number || "");
+            setContactEmail(vendor.contact_email || "");
+        }
+    }, [vendor]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(null);
+
+        const payload = {
+            name,
+            address,
+            phone_number: phoneNumber,
+            contact_email: contactEmail,
+        };
+
+        try {
+            const response = vendor
+                ? await api.put(`/vendors/${vendor.id}/`, payload)
+                : await api.post("/vendors/", payload);
+
+            onSave(response.data);
+            onClose();
+        } catch (err) {
+            console.error(err);
+            setError("Failed to save vendor");
+        }
+    };
+
+    return (
+        <div className="card">
+            <h2>{vendor ? "Edit Vendor" : "New Vendor"}</h2>
+
+            <form onSubmit={handleSubmit}>
+                <label>Name</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} required />
+
+                <label>Address</label>
+                <input value={address} onChange={(e) => setAddress(e.target.value)} />
+
+                <label>Phone Number</label>
+                <input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+
+                <label>Contact Email</label>
+                <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+
+                {error && <p style={{ color: "red" }}>{error}</p>}
+
+                <button type="submit">{vendor ? "Update" : "Create"}</button>
+                <button type="button" onClick={onClose} style={{ marginLeft: 8 }}>Cancel</button>
+            </form>
+        </div>
+    );
+}

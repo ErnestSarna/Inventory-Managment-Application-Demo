@@ -10,14 +10,19 @@ export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
+    const handleLogin = async () => {
+        if (!username || !password) {
+            setError("Username and password are required");
+            return;
+        }
 
         try{
-            await api.post("/auth/login/", {
-                username: e.target.username.value,
-                password: e.target.password.value
-            });
+            let response = await api.post("/auth/login/", {
+                username,
+                password
+            }, {withCredentials: true});
+            console.log(response);
+            setError(null);
             navigate("/dashboard");
         }
         catch(err){
@@ -34,7 +39,7 @@ export default function Login() {
               {!showRegister ? (
               <div className='card'>
                   <h1>Login</h1>
-                  <form onSubmit={handleLogin}>
+                  <div>
                       <div>
                           <label htmlFor="username">Username:</label>
                           <input type="text" id="username" name="username" onChange={(e) => setUsername(e.target.value)} required />
@@ -44,9 +49,9 @@ export default function Login() {
                           <input type="password" id="password" name="password" onChange={(e) => setPassword(e.target.value)} required />
                       </div>
                       {error && <p style={{ color: "red" }}>{error}</p>}
-                      <button type="submit">Login</button>
+                      <button type="button" onClick={handleLogin}>Login</button>
                       <button type="button" onClick={() => setShowRegister(true)}>Register</button>
-                  </form>
+                  </div>
               </div>
               ) : (
                   <Register onClose={() => setShowRegister(false)} />

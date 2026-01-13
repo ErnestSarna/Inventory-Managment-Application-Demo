@@ -6,6 +6,9 @@ export default function Locations() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [showForm, setShowForm] = useState(false);
+    const [editingLocation, setEditingLocation] = useState(null);
+
     useEffect(() => {
         const fetchLocations = async () => {
             setLoading(true);
@@ -31,8 +34,6 @@ export default function Locations() {
 
         try {
             await api.delete(`/locations/${locationId}/`);
-
-            // Remove deleted location from state (no refetch needed)
             setLocations((prev) =>
                 prev.filter((location) => location.id !== locationId)
             );
@@ -42,6 +43,17 @@ export default function Locations() {
         }
     };
 
+    const handleSave = (savedLocation) => {
+        if (editingLocation) {
+            // Update existing
+            setLocations((prev) =>
+                prev.map((loc) => (loc.id === savedLocation.id ? savedLocation : loc))
+            );
+        } else {
+            // Add new
+            setLocations((prev) => [savedLocation, ...prev]);
+        }
+    };
 
     if (loading) return <p>Loading locations...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
@@ -50,7 +62,10 @@ export default function Locations() {
         <div>
             <div className="header">
                 <h2>Storage Locations</h2>
-                <button>+ New Storage Location</button>
+                <button onClick={() => {
+                    setEditingLocation(null);
+                    setShowForm(true);
+                }}>+ New Storage Location</button>
             </div>
             <div>
                 <ul>
@@ -60,7 +75,10 @@ export default function Locations() {
                                 <div className="component-card">
                                     <div className="header">
                                         <strong>{location.name}</strong>
-                                        <button>Edit</button>
+                                        <button onClick={() => {
+                                            setEditingLocation(location);
+                                            setShowForm(true);
+                                        }}>Edit</button>
                                         <button onClick={() => handleDelete(location.id)}>Delete</button>
                                     </div>
                                     <hr/>
@@ -70,7 +88,70 @@ export default function Locations() {
                         </li>
                     ))}
                 </ul>
+
+                {showForm && (
+                    <LocationForm
+                        location={editingLocation}
+                        onClose={() => setShowForm(false)}
+                        onSave={handleSave}
+                    />
+                )}
             </div>
         </div>
     );
 };
+
+function LocationForm({ location, onClose, onSave }) {
+    const [name, setName] = useState("");
+    const [address, setAddress] = useState("");
+    const [error, setError] = useState(null);
+
+    // Populate form when editing
+    useEffect(() => {
+        if (location) {
+            setName(location.name || "");
+            setAddress(location.address || "");
+        }
+    }, [location]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(null);
+
+        const payload = {
+            name,
+            address,
+        };
+
+        try {
+            const response = location
+                ? await api.put(`/locations/${location.id}/`, payload)
+                : await api.post("/locations/", payload);
+
+            onSave(response.data);
+            onClose();
+        } catch (err) {
+            console.error(err);
+            setError("Failed to save location");
+        }
+    };
+
+    return (
+        <div className="card">
+            <h2>{location ? "Edit Location" : "New Storage Location"}</h2>
+
+            <form onSubmit={handleSubmit}>
+                <label>Name</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} required />
+
+                <label>Address</label>
+                <input value={address} onChange={(e) => setAddress(e.target.value)} />
+
+                {error && <p style={{ color: "red" }}>{error}</p>}
+
+                <button type="submit">{location ? "Update" : "Create"}</button>
+                <button type="button" onClick={onClose} style={{ marginLeft: 8 }}>Cancel</button>
+            </form>
+        </div>
+    );
+}

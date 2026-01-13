@@ -31,8 +31,6 @@ export default function Project() {
 
         try {
             await api.delete(`/inventory_items/${itemId}/`);
-
-            // Remove deleted item from state (no refetch needed)
             setInventory((prev) =>
                 prev.filter((item) => item.id !== itemId)
             );
