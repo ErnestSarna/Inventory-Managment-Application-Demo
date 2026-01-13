@@ -5,6 +5,3 @@ Designed for internal project tracking with session-based authentication, inline
 
 To run:
 Execute "docker-compose up --build" from the main project directory.
-
-To create superuser:
-Execute "python manage.py createsuperuser" from the back-end directory.
