@@ -57,12 +57,10 @@ export default function PurchaseOrders() {
 
     const handleSave = (savedPO) => {
         if (editingPO) {
-            // Update existing
             setPurchaseOrders((prev) =>
                 prev.map((po) => (po.id === savedPO.id ? savedPO : po))
             );
         } else {
-            // Add new
             setPurchaseOrders((prev) => [savedPO, ...prev]);
         }
     };
@@ -130,13 +128,11 @@ function PurchaseOrderForm({ po, onClose, onSave }) {
     const [projects, setProjects] = useState([]);
     const [error, setError] = useState(null);
 
-    // Load vendors and projects for dropdowns
     useEffect(() => {
         api.get("/vendors/").then((res) => setVendors(res.data.results || res.data));
         api.get("/projects/").then((res) => setProjects(res.data.results || res.data));
     }, []);
 
-    // Populate form if editing
     useEffect(() => {
         if (po) {
             setOrderNumber(po.order_number || "");

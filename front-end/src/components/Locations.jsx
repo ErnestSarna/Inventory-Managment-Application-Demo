@@ -57,12 +57,10 @@ export default function Locations() {
 
     const handleSave = (savedLocation) => {
         if (editingLocation) {
-            // Update existing
             setLocations((prev) =>
                 prev.map((loc) => (loc.id === savedLocation.id ? savedLocation : loc))
             );
         } else {
-            // Add new
             setLocations((prev) => [savedLocation, ...prev]);
         }
     };
@@ -115,7 +113,6 @@ function LocationForm({ location, onClose, onSave }) {
     const [address, setAddress] = useState("");
     const [error, setError] = useState(null);
 
-    // Populate form when editing
     useEffect(() => {
         if (location) {
             setName(location.name || "");

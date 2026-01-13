@@ -57,12 +57,10 @@ export default function Vendors() {
 
     const handleSave = (savedVendor) => {
         if (editingVendor) {
-            // Update existing
             setVendors((prev) =>
                 prev.map((v) => (v.id === savedVendor.id ? savedVendor : v))
             );
         } else {
-            // Add new
             setVendors((prev) => [savedVendor, ...prev]);
         }
     };
@@ -119,7 +117,6 @@ function VendorForm({ vendor, onClose, onSave }) {
     const [contactEmail, setContactEmail] = useState("");
     const [error, setError] = useState(null);
 
-    // Populate form when editing
     useEffect(() => {
         if (vendor) {
             setName(vendor.name || "");

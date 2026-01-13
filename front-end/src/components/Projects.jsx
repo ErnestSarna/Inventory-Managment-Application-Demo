@@ -95,7 +95,7 @@ export default function Projects() {
                             <hr/>
                             <p>{project.description}</p>
                             <br />
-                            <p><strong>Project Engineer:</strong> {project.proj_engineer.first_name} {project.proj_engineer.last_name}</p>
+                            <p><strong>Project Engineer:</strong> {project.proj_engineer_details.first_name} {project.proj_engineer_details.last_name}</p>
                             <p><strong>Start Date:</strong> {project.start_date}</p>
                             <p><strong>End Date:</strong> {project.end_date}</p>
                         </div>   
@@ -127,21 +127,19 @@ function ProjectForm({ project, onClose, onSave }) {
     const [users, setUsers] = useState([]);
     const [error, setError] = useState(null);
 
-    // Load users
     useEffect(() => {
         api.get("/users/").then((res) => {
             setUsers(res.data.results || res.data);
         });
     }, []);
 
-    // Populate form when editing
     useEffect(() => {
         if (project) {
             setName(project.name);
             setDescription(project.description || "");
             setStartDate(project.start_date || "");
             setEndDate(project.end_date || "");
-            setProjEngineer(project.proj_engineer || "");
+            setProjEngineer(project.proj_engineer?.id || "");
         }
     }, [project]);
 

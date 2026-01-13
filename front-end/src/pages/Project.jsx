@@ -94,18 +94,19 @@ export default function Project() {
                 project: projectId,
             };
 
-            const res =
-                editingId === "new"
-                    ? await api.post("/inventory_items/", payload)
-                    : await api.patch(`/inventory_items/${editingId}/`, payload);
+            let res;
 
-            setInventory((prev) =>
-                editingId === "new"
-                    ? [res.data, ...prev]
-                    : prev.map((i) =>
-                          i.id === editingId ? res.data : i
-                      )
-            );
+            if (editingId === "new") {
+                res = await api.post("/inventory_items/", payload);
+                setInventory((prev) => [res.data, ...prev]);
+            } else {
+                res = await api.patch(`/inventory_items/${editingId}/`, payload);
+                setInventory((prev) =>
+                    prev.map((i) =>
+                        i.id === editingId ? res.data : i
+                    )
+                );
+            }
 
             cancelEdit();
         } catch (err) {
@@ -183,7 +184,7 @@ export default function Project() {
 
 function EditableRow({draft, setDraft, vendors, locations, purchaseOrders, onSave, onCancel}) {
     return (
-        <tr>
+        <tr className="edit-row">
             <td><input type="text" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })}/></td>
             <td><select value={draft.purchase_order_id} onChange={(e) => setDraft({ ...draft, purchase_order_id: e.target.value })}>
                 <option value="">---</option>
