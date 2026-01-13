@@ -10,6 +10,18 @@ export default function Locations() {
     const [editingLocation, setEditingLocation] = useState(null);
 
     useEffect(() => {
+        if (showForm) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [showForm]);
+
+    useEffect(() => {
         const fetchLocations = async () => {
             setLoading(true);
             setError(null);
@@ -55,9 +67,6 @@ export default function Locations() {
         }
     };
 
-    if (loading) return <p>Loading locations...</p>;
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
-
     return (
         <div>
             <div className="header">
@@ -68,33 +77,33 @@ export default function Locations() {
                 }}>+ New Storage Location</button>
             </div>
             <div>
-                <ul>
+                <div className="flex-container">
                     {locations.map((location) => (
-                        <li key={location.id}>
-                            <button>
-                                <div className="component-card">
-                                    <div className="header">
-                                        <strong>{location.name}</strong>
-                                        <button onClick={() => {
-                                            setEditingLocation(location);
-                                            setShowForm(true);
-                                        }}>Edit</button>
-                                        <button onClick={() => handleDelete(location.id)}>Delete</button>
-                                    </div>
-                                    <hr/>
-                                    <p>{location.address}</p>
-                                </div>
-                            </button>
-                        </li>
+                        <div key={location.id} className="component-card">
+                            <div className="header">
+                                <strong>{location.name}</strong>
+                                <button onClick={() => {
+                                    setEditingLocation(location);
+                                    setShowForm(true);
+                                }}>Edit</button>
+                                <button onClick={() => handleDelete(location.id)}>Delete</button>
+                            </div>
+                            <hr/>
+                            <p>{location.address}</p>
+                        </div>
                     ))}
-                </ul>
+                </div>
 
                 {showForm && (
-                    <LocationForm
-                        location={editingLocation}
-                        onClose={() => setShowForm(false)}
-                        onSave={handleSave}
-                    />
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <LocationForm
+                                location={editingLocation}
+                                onClose={() => setShowForm(false)}
+                                onSave={handleSave}
+                            />
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
@@ -125,7 +134,7 @@ function LocationForm({ location, onClose, onSave }) {
 
         try {
             const response = location
-                ? await api.put(`/locations/${location.id}/`, payload)
+                ? await api.patch(`/locations/${location.id}/`, payload)
                 : await api.post("/locations/", payload);
 
             onSave(response.data);

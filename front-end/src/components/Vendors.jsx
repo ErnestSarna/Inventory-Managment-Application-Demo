@@ -10,6 +10,18 @@ export default function Vendors() {
     const [editingVendor, setEditingVendor] = useState(null);
 
     useEffect(() => {
+        if (showForm) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [showForm]);
+
+    useEffect(() => {
         const fetchVendors = async () => {
             setLoading(true);
             setError(null);
@@ -55,9 +67,6 @@ export default function Vendors() {
         }
     };
 
-    if (loading) return <p>Loading vendors...</p>;
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
-
     return (
         <div>    
             <div className="header">
@@ -68,35 +77,35 @@ export default function Vendors() {
                 }}>+ New Vendor</button>
             </div>
             <div>
-                <ul>
+                <div className="flex-container">
                     {vendors.map((vendor) => (
-                        <li key={vendor.id}>
-                            <button>
-                                <div className="component-card">
-                                    <div className="header">
-                                        <strong>{vendor.name}</strong>
-                                        <button onClick={() => {
-                                            setEditingVendor(vendor);
-                                            setShowForm(true);
-                                        }}>Edit</button>
-                                        <button onClick={() => handleDelete(vendor.id)}>Delete</button>
-                                    </div>
-                                    <hr/>
-                                    <p>{vendor.address}</p>
-                                    <p>{vendor.phone_number}</p>
-                                    <p>{vendor.contact_email}</p>
-                                </div>   
-                            </button>
-                        </li>
+                        <div key={vendor.id} className="component-card">
+                            <div className="header">
+                                <strong>{vendor.name}</strong>
+                                <button onClick={() => {
+                                    setEditingVendor(vendor);
+                                    setShowForm(true);
+                                }}>Edit</button>
+                                <button onClick={() => handleDelete(vendor.id)}>Delete</button>
+                            </div>
+                            <hr/>
+                            <p>{vendor.address}</p>
+                            <p>{vendor.phone_number}</p>
+                            <p>{vendor.contact_email}</p>
+                        </div>   
                     ))}
-                </ul>
+                </div>
 
                 {showForm && (
-                    <VendorForm
-                        vendor={editingVendor}
-                        onClose={() => setShowForm(false)}
-                        onSave={handleSave}
-                    />
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <VendorForm
+                                vendor={editingVendor}
+                                onClose={() => setShowForm(false)}
+                                onSave={handleSave}
+                            />
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
@@ -133,7 +142,7 @@ function VendorForm({ vendor, onClose, onSave }) {
 
         try {
             const response = vendor
-                ? await api.put(`/vendors/${vendor.id}/`, payload)
+                ? await api.patch(`/vendors/${vendor.id}/`, payload)
                 : await api.post("/vendors/", payload);
 
             onSave(response.data);

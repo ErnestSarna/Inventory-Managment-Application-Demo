@@ -12,6 +12,18 @@ export default function Projects() {
     const [editingProject, setEditingProject] = useState(null);
 
     useEffect(() => {
+        if (showForm) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [showForm]);
+
+    useEffect(() => {
         const fetchProjects = async () => {
             setLoading(true);
             setError(null);
@@ -47,18 +59,13 @@ export default function Projects() {
 
     const handleSave = (savedProject) => {
         if (editingProject) {
-        // update in list
-        setProjects((prev) =>
-            prev.map((p) => (p.id === savedProject.id ? savedProject : p))
+            setProjects((prev) =>
+                prev.map((p) => (p.id === savedProject.id ? savedProject : p))
         );
         } else {
-        // add to list
-        setProjects((prev) => [savedProject, ...prev]);
+            setProjects((prev) => [savedProject, ...prev]);
         }
     };
-
-    if (loading) return <p>Loading projects...</p>;
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
 
     return (
         <div>
@@ -70,37 +77,41 @@ export default function Projects() {
                 }}>+ New Project</button>
             </div>
             <div>
-                <ul>
+                <div className="flex-container">
                     {projects.map((project) => (
-                        <li key={project.id}>
-                            <button onClick={() => navigate(`/projects/${project.id}`)}>
-                                <div className="component-card">
-                                    <div className="header">
-                                        <strong>{project.name}</strong>
-                                        <button onClick={(e) => {
-                                            setEditingProject(project);
-                                            setShowForm(true);
-                                        }}>Edit</button>
-                                        <button onClick={() => handleDelete(project.id)}>Delete</button>
-                                    </div>
-                                    <hr/>
-                                    <p>{project.description}</p>
-                                    <br />
-                                    <p><strong>Project Engineer:</strong> {project.proj_engineer.first_name} {project.proj_engineer.last_name}</p>
-                                    <p><strong>Start Date:</strong> {project.start_date}</p>
-                                    <p><strong>End Date:</strong> {project.end_date}</p>
-                                </div>   
-                            </button>
-                        </li>
+                        <div key={project.id} onClick={() => navigate(`/projects/${project.id}`)} className="component-card">
+                            <div className="header">
+                                <strong>{project.name}</strong>
+                                <button onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingProject(project);
+                                    setShowForm(true);
+                                }}>Edit</button>
+                                <button onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(project.id)}
+                                }>Delete</button>
+                            </div>
+                            <hr/>
+                            <p>{project.description}</p>
+                            <br />
+                            <p><strong>Project Engineer:</strong> {project.proj_engineer.first_name} {project.proj_engineer.last_name}</p>
+                            <p><strong>Start Date:</strong> {project.start_date}</p>
+                            <p><strong>End Date:</strong> {project.end_date}</p>
+                        </div>   
                     ))}
-                </ul>
+                </div>
 
                 {showForm && (
-                    <ProjectForm
-                        project={editingProject}
-                        onClose={() => setShowForm(false)}
-                        onSave={handleSave}
-                    />
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <ProjectForm
+                                project={editingProject}
+                                onClose={() => setShowForm(false)}
+                                onSave={handleSave}
+                            />
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
@@ -148,7 +159,7 @@ function ProjectForm({ project, onClose, onSave }) {
 
         try {
             const response = project
-                ? await api.put(`/projects/${project.id}/`, payload)
+                ? await api.patch(`/projects/${project.id}/`, payload)
                 : await api.post("/projects/", payload);
 
             onSave(response.data);
@@ -168,7 +179,7 @@ function ProjectForm({ project, onClose, onSave }) {
                 <input value={name} onChange={(e) => setName(e.target.value)} required />
 
                 <label>Description</label>
-                <textarea
+                <input
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 />
